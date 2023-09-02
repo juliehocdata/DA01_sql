@@ -39,7 +39,20 @@ ROW_NUMBER() OVER(PARTITION BY C.name ORDER BY a.length DESC, a.film_id) as rank
 FROM film a 
 JOIN film_category B ON A.film_id=B.film_id
 JOIN category C ON C.category_id =b.category_id 
+  
+/*Viết truy vấn trả về doanh thu trong ngày và doanh thu 
+của ngày ngày hôm trước
+Sau đó tính toán phần trăm tăng trưởng so với ngày hôm trước.*/
 
+SELECT payment_date,amount, 
+LAG(amount) over(order by payment_date ) AS previous_amount,
+round((amount-LAG(amount) over(order by payment_date ))/LAG(amount) over(order by payment_date ),2)*100 as diff
+from 
+(select date(payment_date) payment_date,
+SUM(amount) amount
+FROM payment
+GROUP BY date(payment_date)) t
+  
 -- WINDOW FUNCTION with FIRST_VALUE
 -- số tiền thanh toán cho đơn hàng đầu tiên và gần đây nhất của từng khách hàng
 SELECT * FROM
