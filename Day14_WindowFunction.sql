@@ -43,15 +43,22 @@ JOIN category C ON C.category_id =b.category_id
 /*Viết truy vấn trả về doanh thu trong ngày và doanh thu 
 của ngày ngày hôm trước
 Sau đó tính toán phần trăm tăng trưởng so với ngày hôm trước.*/
-
-SELECT payment_date,amount, 
-LAG(amount) over(order by payment_date ) AS previous_amount,
-round((amount-LAG(amount) over(order by payment_date ))/LAG(amount) over(order by payment_date ),2)*100 as diff
-from 
-(select date(payment_date) payment_date,
-SUM(amount) amount
+with twt_main_payment as
+(
+SELECT 
+date(payment_date) as payment_date,
+SUM(amount) as amount
 FROM payment
-GROUP BY date(payment_date)) t
+GROUP BY date(payment_date)
+)
+
+SELECT payment_date,
+amount ,
+LAG(payment_date) OVER(ORDER BY payment_date) as previous_payment_date,
+LAG(amount) OVER(ORDER BY payment_date) as previous_amount,
+ROUND(((amount-LAG(amount) OVER(ORDER BY payment_date) )
+ /LAG(amount) OVER(ORDER BY payment_date))*100,2) as percent_diff
+FROM twt_main_payment
   
 -- WINDOW FUNCTION with FIRST_VALUE
 -- số tiền thanh toán cho đơn hàng đầu tiên và gần đây nhất của từng khách hàng
