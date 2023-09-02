@@ -1,3 +1,24 @@
+/*Viết truy vấn trả về danh sách phim bao gồm
+- film_id,
+- title,
+- length,
+- category,
+- thời lượng trung bình của phim trong category đó.
+Sắp xếp kết quả theo film_id.*/
+SELECT a.film_id,a.title,a.length, c.name as category,
+AVG(a.length) OVER(PARTITION BY c.name ORDER BY a.film_id)
+FROM film a
+JOIN public.film_category b on a.film_id=b.film_id
+join public.category c on c.category_id=b.category_id
+
+/*Viết truy vấn trả về tất cả chi tiết các thanh toán bao gồm
+-số lần thanh toán được thực hiện bởi khách hàng này và số tiền đó
+Sắp xếp kết quả theo Payment_id.*/
+SELECT *,
+COUNT(*) OVER(PARTITION BY customer_id,amount) as sd
+FROM payment
+order by payment_id
+
 -- WINDOW FUNCTION with RANK FUNCTION 
 -- xếp hạng độ dài phim trong từng thể loại 
 -- output: film_id, category, length, xếp hạng độ dài phim trong từng category
