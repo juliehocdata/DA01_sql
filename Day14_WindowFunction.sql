@@ -23,4 +23,22 @@ customer_id,payment_date,amount,
 FIRST_VALUE(amount) OVER(PARTITION BY customer_id ORDER BY payment_date) AS first_amount
 ,FIRST_VALUE(amount) OVER(PARTITION BY customer_id ORDER BY payment_date DESC) AS last_amount
 FROM payment
+-- WINDOW FUNCTION with LEAD(), LAG()
+-- tìm chênh lệch số tiền giữa các lần thanh toán của từng khách hàng
+select 
+customer_id,
+payment_date,
+amount,
+LEAD (amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as next_amount,
+LEAD(payment_date) OVER(PARTITION BY customer_id ORDER BY payment_date) as next_payment_date,
+amount-LEAD(amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as diff
+from payment;
+select 
+customer_id,
+payment_date,
+amount,
+LAG (amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as previous_amount,
+LAG(payment_date) OVER(PARTITION BY customer_id ORDER BY payment_date) as previous_payment_date,
+amount-LAG(amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as diff
+from payment
 
