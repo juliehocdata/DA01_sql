@@ -1,3 +1,13 @@
+-- WINDOW FUNCTION with SUM(), COUNT(), AVG()
+
+SELECT payment_date,customer_id,amount,
+SUM(amount) OVER(PARTITION BY customer_id ORDER BY payment_date)  AS total_amount
+FROM payment ;
+-- cu phap
+SELECT col1, col2,...,
+AGG(col2) OVER(PARTITION BY col1, col2,.. ORDER BY col3) 
+FROM table_nm 
+  
 /*Viết truy vấn trả về danh sách phim bao gồm
 - film_id,
 - title,
