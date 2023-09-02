@@ -39,26 +39,26 @@ ROW_NUMBER() OVER(PARTITION BY C.name ORDER BY a.length DESC, a.film_id) as rank
 FROM film a 
 JOIN film_category B ON A.film_id=B.film_id
 JOIN category C ON C.category_id =b.category_id 
-  
-/*Viết truy vấn trả về doanh thu trong ngày và doanh thu 
-của ngày ngày hôm trước
-Sau đó tính toán phần trăm tăng trưởng so với ngày hôm trước.*/
-with twt_main_payment as
+/*Viết truy vấn trả về tên khách hàng, quốc gia và số lượng
+thanh toán mà họ có 
+Sau đó tạo bảng xếp hạng những khách hàng có doanh thu cao nhất cho mỗi quốc gia. 
+Lọc kết quả chỉ 3 khách hàng hàng đầu của mỗi quốc gia*/
+SELECT * FROM
 (
-SELECT 
-date(payment_date) as payment_date,
-SUM(amount) as amount
-FROM payment
-GROUP BY date(payment_date)
-)
+select a.first_name|| ' '||a.last_name AS full_name,
+d.country,
+count(*) as so_luong,
+sum(e.amount) as amount,
+RANK() OVER(PARTITION BY d.country ORDER BY sum(e.amount) DESC) AS stt
+from customer a
+JOIN address b on a.address_id=b.address_id
+JOIN city c on c.city_id=b.city_id
+JOIN country d on d.country_id=c.country_id
+JOIN payment e on e.customer_id=a.customer_id
+GROUP BY a.first_name|| ' '||a.last_name,
+d.country) T
+WHERE T.stt<= 3  
 
-SELECT payment_date,
-amount ,
-LAG(payment_date) OVER(ORDER BY payment_date) as previous_payment_date,
-LAG(amount) OVER(ORDER BY payment_date) as previous_amount,
-ROUND(((amount-LAG(amount) OVER(ORDER BY payment_date) )
- /LAG(amount) OVER(ORDER BY payment_date))*100,2) as percent_diff
-FROM twt_main_payment
   
 -- WINDOW FUNCTION with FIRST_VALUE
 -- số tiền thanh toán cho đơn hàng đầu tiên và gần đây nhất của từng khách hàng
@@ -92,4 +92,24 @@ LAG (amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as previous_am
 LAG(payment_date) OVER(PARTITION BY customer_id ORDER BY payment_date) as previous_payment_date,
 amount-LAG(amount) OVER(PARTITION BY customer_id ORDER BY payment_date) as diff
 from payment
+
+/*Viết truy vấn trả về doanh thu trong ngày và doanh thu 
+của ngày ngày hôm trước
+Sau đó tính toán phần trăm tăng trưởng so với ngày hôm trước.*/
+with twt_main_payment as
+(
+SELECT 
+date(payment_date) as payment_date,
+SUM(amount) as amount
+FROM payment
+GROUP BY date(payment_date)
+)
+
+SELECT payment_date,
+amount ,
+LAG(payment_date) OVER(ORDER BY payment_date) as previous_payment_date,
+LAG(amount) OVER(ORDER BY payment_date) as previous_amount,
+ROUND(((amount-LAG(amount) OVER(ORDER BY payment_date) )
+ /LAG(amount) OVER(ORDER BY payment_date))*100,2) as percent_diff
+FROM twt_main_payment
 
