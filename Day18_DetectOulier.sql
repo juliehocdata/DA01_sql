@@ -30,10 +30,18 @@ from user_data) as avg,
 from user_data) as stddev
 from user_data)
 
+,TWT_outlier as(
 select data_date,users, (users-avg)/stddev as z_score
 from cte
-where abs((users-avg)/stddev )>3
+where abs((users-avg)/stddev )>3)
 
+UPDATE user_data
+SET USERS=(select avg(users)
+from user_data)
+WHERE USERS IN(SELECT  users from TWT_outlier);
+
+DELETE FROM user_data
+WHERE USERS IN (SELECT  users from TWT_outlier);
 
 
 
