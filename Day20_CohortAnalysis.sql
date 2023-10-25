@@ -36,13 +36,6 @@ invoicedate
 from online_retail_main t
 ) a)
 
-SELECT 
-cohort_date,
-index,
-count(distinct customerid) as cnt,
-sum(amount) as revenue
-from online_retail_index
-group by cohort_date, index
 
 
 
